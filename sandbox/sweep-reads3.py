@@ -10,6 +10,7 @@ Use '-h' for parameter help.
 """
 
 import sys, khmer
+import os
 import os.path
 import screed
 #from khmer.hashbits_args import build_construct_args, DEFAULT_MIN_HASHSIZE
@@ -38,8 +39,10 @@ def main():
     HT_SIZE=args.min_hashsize
     N_HT=args.n_hashes
 
-    inputlist = args.input_filenames
+    inputlist = args.input_filenames 
     readsfile = args.read_filename
+
+    logfile = open('sweep3.log', 'a')
 
     query_list = []
     for n, inp_name in enumerate(inputlist):
@@ -52,8 +55,11 @@ def main():
         outfp = open(outfile, 'w')
         query_list.append((ht, outfp))
 
+    new_lis = []
+    cnt = 0
     for n, inp_name in enumerate(inputlist):
         ht = query_list[n][0]
+        outfp = query_list[n][1]
 
         # load contigs, connect into N partitions
         print 'loading input reads from', inp_name
@@ -66,20 +72,28 @@ def main():
         if fp_rate > 0.20:
             print >>sys.stderr, "**"
             print >>sys.stderr, "** ERROR: the counting hash is too small for"
-            print >>sys.stderr, "** this data set.  Increase hashsize/num ht."
+            print >>sys.stderr, "** %s.  Increase hashsize/num ht." %(inp_name)
             print >>sys.stderr, "**"
             print >>sys.stderr, "** Do not use these results!!"
-            sys.exit(-1)
+            print >> logfile, "%s is not processed, inscrease mem" %(inp_name)
+            cnt += 1
+            outfp.close()
+            os.remove('%s.sweep3' %os.path.basename(inp_name))
+
+        else:
+            new_lis.append(query_list[n])
+
+    print '%d files do not have enough mem assigned' %cnt
 
     print 'starting sweep.'
 
     n = 0
     m = 0
     for n, record in enumerate(screed.open(readsfile)):
-        if n % 10000 == 0:
-            print '...', n, m
+        #if n % 1000000 == 0:
+        #    print '...', n, m
 
-        for ht, outfp in query_list:
+        for ht, outfp in new_lis:
             count = ht.get_median_count(record.sequence)[0]
             if count:
                 outfp.write('>%s\n%s\n' % (record.name, record.sequence))
