@@ -98,7 +98,7 @@ def main():
         if n % 100000 == 0:
             print '...', n, m
 
-        for ht, outfp in new_list:
+        for ht, outfp in new_lis:
             count = ht.get_median_count(record.sequence)[0]
             if count:
                 outfp.write('>%s\n%s\n' % (record.name, record.sequence))
