@@ -9,10 +9,11 @@ Results end up in <search reads>.sweep2.
 Use '-h' for parameter help.
 """
 
-import sys, khmer
+import sys
+import khmer
 import os.path
 import screed
-from khmer.counting_args import build_construct_args, DEFAULT_MIN_HASHSIZE
+from khmer.hashbits_args import build_construct_args, DEFAULT_MIN_HASHSIZE
 
 def main():
     parser = build_construct_args()
@@ -23,19 +24,24 @@ def main():
 
     if not args.quiet:
         if args.min_hashsize == DEFAULT_MIN_HASHSIZE:
-            print>>sys.stderr, "** WARNING: hashsize is default!  You absodefly want to increase this!\n** Please read the docs!"
+            print >>sys.stderr, "** WARNING: hashsize is default!  " \
+                "You absodefly want to increase this!\n** " \
+                "Please read the docs!"
 
-        print>>sys.stderr, '\nPARAMETERS:'
-        print>>sys.stderr, ' - kmer size =    %d \t\t(-k)' % args.ksize
-        print>>sys.stderr, ' - n hashes =     %d \t\t(-N)' % args.n_hashes
-        print>>sys.stderr, ' - min hashsize = %-5.2g \t(-x)' % args.min_hashsize
-        print>>sys.stderr, ''
-        print>>sys.stderr, 'Estimated memory usage is %.2g bytes (n_hashes x min_hashsize)' % (args.n_hashes * args.min_hashsize)
-        print>>sys.stderr, '-'*8
+        print >>sys.stderr, '\nPARAMETERS:'
+        print >>sys.stderr, ' - kmer size =    %d \t\t(-k)' % args.ksize
+        print >>sys.stderr, ' - n hashes =     %d \t\t(-N)' % args.n_hashes
+        print >>sys.stderr, ' - min hashsize = %-5.2g \t(-x)' % \
+            args.min_hashsize
+        print >>sys.stderr, ''
+        print >>sys.stderr, 'Estimated memory usage is %.2g bytes ' \
+            '(n_hashes x min_hashsize / 8)' % (
+            args.n_hashes * args.min_hashsize / 8.)
+        print >>sys.stderr, '-' * 8
 
-    K=args.ksize
-    HT_SIZE=args.min_hashsize
-    N_HT=args.n_hashes
+    K = args.ksize
+    HT_SIZE = args.min_hashsize
+    N_HT = args.n_hashes
 
     inp = args.input_filename
     readsfile = args.read_filename
@@ -44,9 +50,7 @@ def main():
     outfp = open(outfile, 'w')
 
     # create a hashbits data structure
-    #ht = khmer.new_hashbits(K, HT_SIZE, N_HT)
-    ## create a counting hashing
-    ht = khmer.new_counting_hash(K, HT_SIZE, N_HT)
+    ht = khmer.new_hashbits(K, HT_SIZE, N_HT)
 
     # load contigs, connect into N partitions
     print 'loading input reads from', inp
@@ -69,7 +73,10 @@ def main():
     n = 0
     m = 0
     for record in screed.open(readsfile):
-        if n % 10000 == 0:
+        if len(record.sequence) < K:
+            continue
+
+        if n % 100000 == 0:
             print '...', n, m
 
         count = ht.get_median_count(record.sequence)[0]

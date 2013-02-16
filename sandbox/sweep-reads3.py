@@ -9,12 +9,11 @@ Results end up in <search reads>.sweep3.
 Use '-h' for parameter help.
 """
 
-import sys, khmer
-import os
+import sys
 import os.path
 import screed
-#from khmer.hashbits_args import build_construct_args, DEFAULT_MIN_HASHSIZE
-from khmer.counting_args import build_construct_args, DEFAULT_MIN_HASHSIZE
+import khmer
+from khmer.hashbits_args import build_construct_args, DEFAULT_MIN_HASHSIZE
 
 def main():
     parser = build_construct_args()
@@ -25,15 +24,20 @@ def main():
 
     if not args.quiet:
         if args.min_hashsize == DEFAULT_MIN_HASHSIZE:
-            print>>sys.stderr, "** WARNING: hashsize is default!  You absodefly want to increase this!\n** Please read the docs!"
+            print >>sys.stderr, "** WARNING: hashsize is default!  " \
+                "You absodefly want to increase this!\n** " \
+                "Please read the docs!"
 
-        print>>sys.stderr, '\nPARAMETERS:'
-        print>>sys.stderr, ' - kmer size =    %d \t\t(-k)' % args.ksize
-        print>>sys.stderr, ' - n hashes =     %d \t\t(-N)' % args.n_hashes
-        print>>sys.stderr, ' - min hashsize = %-5.2g \t(-x)' % args.min_hashsize
-        print>>sys.stderr, ''
-        print>>sys.stderr, 'Estimated memory usage is %.2g bytes (n_hashes x min_hashsize)' % (args.n_hashes * args.min_hashsize)
-        print>>sys.stderr, '-'*8
+        print >>sys.stderr, '\nPARAMETERS:'
+        print >>sys.stderr, ' - kmer size =    %d \t\t(-k)' % args.ksize
+        print >>sys.stderr, ' - n hashes =     %d \t\t(-N)' % args.n_hashes
+        print >>sys.stderr, ' - min hashsize = %-5.2g \t(-x)' % \
+            args.min_hashsize
+        print >>sys.stderr, ''
+        print >>sys.stderr, 'Estimated memory usage is %.2g bytes ' \
+            '(n_hashes x min_hashsize / 8)' % (
+            args.n_hashes * args.min_hashsize * len(args.input_filenames) / 8.)
+        print >>sys.stderr, '-'*8
 
     K=args.ksize
     HT_SIZE=args.min_hashsize
@@ -47,9 +51,7 @@ def main():
     query_list = []
     for n, inp_name in enumerate(inputlist):
         # create a hashbits data structure
-        # ht = khmer.new_hashbits(K, HT_SIZE, N_HT)
-        # create a counting hash
-        ht = khmer.new_counting_hash(K, HT_SIZE, N_HT)
+        ht = khmer.new_hashbits(K, HT_SIZE, N_HT)
 
         outfile = os.path.basename(inp_name) + '.sweep3'
         outfp = open(outfile, 'w')
@@ -90,10 +92,13 @@ def main():
     n = 0
     m = 0
     for n, record in enumerate(screed.open(readsfile)):
-        #if n % 1000000 == 0:
-        #    print '...', n, m
+        if len(record.sequence) < K:
+            continue
 
-        for ht, outfp in new_lis:
+        if n % 100000 == 0:
+            print '...', n, m
+
+        for ht, outfp in new_list:
             count = ht.get_median_count(record.sequence)[0]
             if count:
                 outfp.write('>%s\n%s\n' % (record.name, record.sequence))
