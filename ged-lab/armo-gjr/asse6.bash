@@ -49,8 +49,7 @@ cd $OUTDIR
 CNT=0
 
 # PASS1: digiNorm -C $DIGINORM_C
-echo PASS1 digiNorm -C $DIGINORM_C:
-echo PASS1 digiNorm -C $DIGINORM_C: 1>&2
+echo "PASS1 digiNorm -C $DIGINORM_C:" | tee /dev/stderr
 
 for i in $LIS
 do
@@ -73,40 +72,33 @@ do
 done
 
 # PASS3: filter high abund > 50
-echo "PASS2: filter-below-abund.py"
-echo "PASS2: filter-below-abund.py" 1>&2
+echo "PASS2: filter-below-abund.py" | tee /dev/stderr
 time(
 python /mnt/home/guojiaro/Documents/lib/git/khmer/sandbox/filter-below-abund.py $HASHTABLE *.keep
 )
 ### Partitioning
-echo "start partitioning"
-echo "start partitioning" 1>&2
+echo "start partitioning" | tee /dev/stderr
 #Initial round
-echo "Initial round (load-graph.py):"
-echo "Initial round (load-graph.py):" 1>&2
+echo "Initial round (load-graph.py):" | tee /dev/stderr
 time(
 python /mnt/home/guojiaro/Documents/lib/git/khmer/scripts/load-graph.py -k 32 -N 4 -x $PART_HASHSIZE $PARTLABEL *.keep.below
 )
-echo "Partition graph (partition-graph.py):"
-echo "Partition graph (partition-graph.py):" 1>&2
+echo "Partition graph (partition-graph.py):" | tee /dev/stderr
 time(
 python /mnt/home/guojiaro/Documents/lib/git/khmer/scripts/partition-graph.py --threads 8 -s 1e6 $PARTLABEL
 )
 
-echo "Merge parts (merge-partitions.py):"
-echo "Merge parts (merge-partitions.py):" 1>&2
+echo "Merge parts (merge-partitions.py):" | tee /dev/stderr
 time(
 python /mnt/home/guojiaro/Documents/lib/git/khmer/scripts/merge-partitions.py $PARTLABEL
 )
 
-echo "Annotate parts (annotate-partitions.py):"
-echo "Annotate parts (annotate-partitions.py):" 1>&2
+echo "Annotate parts (annotate-partitions.py):" | tee /dev/stderr
 time(
 python /mnt/home/guojiaro/Documents/lib/git/khmer/scripts/annotate-partitions.py $PARTLABEL *.keep.below
 )
 
-echo "extract-partitions.py:"
-echo "extract-partitions.py:" 1>&2
+echo "extract-partitions.py:" | tee /dev/stderr
 time(
 python /mnt/home/guojiaro/Documents/lib/git/khmer/scripts/extract-partitions.py $PARTLABEL *.keep.below.part
 )
