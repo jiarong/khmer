@@ -16,7 +16,7 @@ OUTDIR=/mnt/scratch/tg/g/data/amo/allIn/P.R1
 #OUTDIR=/mnt/scratch/tg/g/test
 LIS=$(find /mnt/scratch/tg/g/data/amo/P.R1.A* -name *.afterMerge.fastq)
 echo "Number of files to process:"
-find /mnt/scratch/tg/g/data/amo/P.R1.A* -name *.afterMerge.fastq | wc -l
+wc -l <<< "$LIS"
 echo
 #LIS=$(find /mnt/scratch/tg/g/test -name 10K*.fastq)
 
@@ -25,8 +25,7 @@ PARTLABEL=amo.part          #PARTLABEL
 
 ###===============> REQUEST THIS memory
 # keep 4/5 of the MEM for hashTables
-MEM=$MEM_GB*10^9 ### gb
-MEM=$(bc <<< "$MEM")
+MEM=$(bc <<< "$MEM_GB*10^9")
 DIGNORM_HASHSIZE=$(bc <<< "scale=2; $MEM*$RATIO/4")
 PART_HASHSIZE=$(bc <<< "scale=2; $MEM*$RATIO/4*8")
 
@@ -72,33 +71,34 @@ do
 done
 
 # PASS3: filter high abund > 50
+KMER="/mnt/home/guojiaro/Documents/lib/git/khmer"
 echo "PASS2: filter-below-abund.py" | tee /dev/stderr
 time(
-python /mnt/home/guojiaro/Documents/lib/git/khmer/sandbox/filter-below-abund.py $HASHTABLE *.keep
+python ${KMER}/sandbox/filter-below-abund.py $HASHTABLE *.keep
 )
 ### Partitioning
 echo "start partitioning" | tee /dev/stderr
 #Initial round
 echo "Initial round (load-graph.py):" | tee /dev/stderr
 time(
-python /mnt/home/guojiaro/Documents/lib/git/khmer/scripts/load-graph.py -k 32 -N 4 -x $PART_HASHSIZE $PARTLABEL *.keep.below
+python ${KMER}/scripts/load-graph.py -k 32 -N 4 -x $PART_HASHSIZE $PARTLABEL *.keep.below
 )
 echo "Partition graph (partition-graph.py):" | tee /dev/stderr
 time(
-python /mnt/home/guojiaro/Documents/lib/git/khmer/scripts/partition-graph.py --threads 8 -s 1e6 $PARTLABEL
+python ${KMER}/scripts/partition-graph.py --threads 8 -s 1e6 $PARTLABEL
 )
 
 echo "Merge parts (merge-partitions.py):" | tee /dev/stderr
 time(
-python /mnt/home/guojiaro/Documents/lib/git/khmer/scripts/merge-partitions.py $PARTLABEL
+python ${KMER}/scripts/merge-partitions.py $PARTLABEL
 )
 
 echo "Annotate parts (annotate-partitions.py):" | tee /dev/stderr
 time(
-python /mnt/home/guojiaro/Documents/lib/git/khmer/scripts/annotate-partitions.py $PARTLABEL *.keep.below
+python ${KMER}/scripts/annotate-partitions.py $PARTLABEL *.keep.below
 )
 
 echo "extract-partitions.py:" | tee /dev/stderr
 time(
-python /mnt/home/guojiaro/Documents/lib/git/khmer/scripts/extract-partitions.py $PARTLABEL *.keep.below.part
+python ${KMER}/scripts/extract-partitions.py $PARTLABEL *.keep.below.part
 )
