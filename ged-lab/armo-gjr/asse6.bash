@@ -46,8 +46,7 @@ CNT=0
 # PASS1: digiNorm -C $DIGINORM_C
 echo "PASS1 digiNorm -C $DIGINORM_C:" | tee /dev/stderr
 
-for i in $LIS
-do
+for i in $LIS ; do
   SEQ=$i
 
   if [ $CNT -eq 0 ]; then
@@ -67,7 +66,7 @@ do
 done
 
 # PASS3: filter high abund > 50
-KMER="/mnt/home/guojiaro/Documents/lib/git/khmer"
+KHMER="/mnt/home/guojiaro/Documents/lib/git/khmer"
 echo "PASS2: filter-below-abund.py" | tee /dev/stderr
 time(
 python ${KMER}/sandbox/filter-below-abund.py $HASHTABLE *.keep
