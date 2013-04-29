@@ -11,7 +11,7 @@ MEM_GB=1000
 RATIO=0.998  # part of MEM for bashTables
 THREADS=1
 DIGINORM_C=10
-###==============> repalce the file name
+###==============> replace the file name
 OUTDIR=/mnt/scratch/tg/g/data/amo/allIn/P.R1
 #OUTDIR=/mnt/scratch/tg/g/test
 LIS=$(find /mnt/scratch/tg/g/data/amo/P.R1.A* -name *.afterMerge.fastq)
@@ -42,6 +42,7 @@ mkdir -p $OUTDIR
 
 cd $OUTDIR
 CNT=0
+KHMER="/mnt/home/guojiaro/Documents/lib/git/khmer"
 
 # PASS1: digiNorm -C $DIGINORM_C
 echo "PASS1 digiNorm -C $DIGINORM_C:" | tee /dev/stderr
@@ -51,12 +52,12 @@ for i in $LIS ; do
 
   if [ $CNT -eq 0 ]; then
     time(
-    python /mnt/home/guojiaro/Documents/lib/git/khmer/scripts/normalize-by-median.py -k 20 -C $DIGINORM_C -x $DIGNORM_HASHSIZE -N 4 -R $HASHTABLE.$CNT.report --savehash $HASHTABLE  $SEQ
+    python ${KMER}/scripts/normalize-by-median.py -k 20 -C $DIGINORM_C -x $DIGNORM_HASHSIZE -N 4 -R $HASHTABLE.$CNT.report --savehash $HASHTABLE  $SEQ
     echo $SEQ processed by normalzie-by-median.py > $HASHTABLE.log
     )
   else
     time(
-    python /mnt/home/guojiaro/Documents/lib/git/khmer/scripts/normalize-by-median.py -k 20 -C $DIGINORM_C -x $DIGNORM_HASHSIZE -N 4 -R $HASHTABLE.$CNT.report --savehash $HASHTABLE -l $HASHTABLE $SEQ
+    python ${KMER}/scripts/normalize-by-median.py -k 20 -C $DIGINORM_C -x $DIGNORM_HASHSIZE -N 4 -R $HASHTABLE.$CNT.report --savehash $HASHTABLE -l $HASHTABLE $SEQ
     )
     echo $SEQ processed by normalzie-by-median.py >> $HASHTABLE.log
   fi
@@ -66,7 +67,6 @@ for i in $LIS ; do
 done
 
 # PASS3: filter high abund > 50
-KHMER="/mnt/home/guojiaro/Documents/lib/git/khmer"
 echo "PASS2: filter-below-abund.py" | tee /dev/stderr
 time(
 python ${KMER}/sandbox/filter-below-abund.py $HASHTABLE *.keep
