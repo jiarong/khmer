@@ -38,11 +38,7 @@ echo "$PARTLABEL"
 set -e
 module load screed
 
-if [ ! -d $OUTDIR ]; then
-  mkdir $OUTDIR
-else
-  echo "$OUTDIR already exists.."
-fi
+mkdir -p $OUTDIR
 
 cd $OUTDIR
 CNT=0
