@@ -47,7 +47,7 @@ def assemble_sequences(f, k, length_cutoff=LENGTH_CUTOFF):
         shutil.rmtree(dirname)
         #print 'XXX', dirname
 
-def best_assemble_sequences(f, try_k=(33, 37, 40, 50, 70)):
+def best_assemble_sequences(f, try_k=(33, 37, 39, 49, 69)):
 
     sep_PEandSE(f) # produce .pe and se files
 

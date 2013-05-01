@@ -22,9 +22,8 @@ PARTLABEL=amoF.lumpFilt          #PARTLABEL
 
 ###===============> REQUEST THIS memory
 # keep 4/5 of the MEM for hashTables
-MEM=$MEM_GB*10^9 ### gb
-MEM=$(echo "$MEM" | bc)
-PART_HASHSIZE=$(echo "scale=2; $MEM*$RATIO/4*8" | bc)
+MEM=$(bc <<< "$MEM_GB*10^9") ### gb
+PART_HASHSIZE=$(bc <<< "scale=2; $MEM*$RATIO/4*8")
 
 echo "$MEM"
 echo "$PART_HASHSIZE"

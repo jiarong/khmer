@@ -5,6 +5,10 @@
 #PBS -m abe
 #PBS -A ged-intel11
 
+#
+# the above the parameters for HPC
+#
+
 ###==============> change MEM
 # change relative #PBS
 MEM_GB=1000
