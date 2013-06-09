@@ -32,7 +32,7 @@ def assemble_sequences(f, k, length_cutoff=LENGTH_CUTOFF):
         (stdout, stderr) = p.communicate()
         assert p.returncode == 0, (stdout, stderr)
 
-        p = subprocess.Popen('velvetg %s -read_trkg yes -exp_cov auto -cov_cutoff 0' % (assemble_dir,),
+        p = subprocess.Popen('velvetg %s -read_trkg yes -exp_cov auto -cov_cutoff 0 -min_contig_lgth %d' % (assemble_dir, length_cutoff),
                              shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         (stdout, stderr) = p.communicate()
         assert p.returncode == 0, (stdout, stderr)
