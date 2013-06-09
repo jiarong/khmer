@@ -46,6 +46,9 @@ def main():
         print 'We WILL build the tagset (for partitioning/traversal).'
 
     ###
+    config = khmer.get_config()
+    config.set_number_of_threads(n_threads)
+
 
     print 'making hashtable'
     ht = khmer.new_hashbits(K, HT_SIZE, N_HT)
