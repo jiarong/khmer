@@ -9,8 +9,12 @@ Results end up in <search reads>.sweep2.
 Use '-h' for parameter help.
 """
 
+<<<<<<< HEAD
 import sys
 import khmer
+=======
+import sys, khmer
+>>>>>>> bleeding-edge
 import os.path
 import screed
 from khmer.hashbits_args import build_construct_args, DEFAULT_MIN_HASHSIZE
@@ -24,6 +28,7 @@ def main():
 
     if not args.quiet:
         if args.min_hashsize == DEFAULT_MIN_HASHSIZE:
+<<<<<<< HEAD
             print >>sys.stderr, "** WARNING: hashsize is default!  " \
                 "You absodefly want to increase this!\n** " \
                 "Please read the docs!"
@@ -42,6 +47,21 @@ def main():
     K = args.ksize
     HT_SIZE = args.min_hashsize
     N_HT = args.n_hashes
+=======
+            print>>sys.stderr, "** WARNING: hashsize is default!  You absodefly want to increase this!\n** Please read the docs!"
+
+        print>>sys.stderr, '\nPARAMETERS:'
+        print>>sys.stderr, ' - kmer size =    %d \t\t(-k)' % args.ksize
+        print>>sys.stderr, ' - n hashes =     %d \t\t(-N)' % args.n_hashes
+        print>>sys.stderr, ' - min hashsize = %-5.2g \t(-x)' % args.min_hashsize
+        print>>sys.stderr, ''
+        print>>sys.stderr, 'Estimated memory usage is %.2g bytes (n_hashes x min_hashsize / 8)' % (args.n_hashes * args.min_hashsize / 8.)
+        print>>sys.stderr, '-'*8
+
+    K=args.ksize
+    HT_SIZE=args.min_hashsize
+    N_HT=args.n_hashes
+>>>>>>> bleeding-edge
 
     inp = args.input_filename
     readsfile = args.read_filename
@@ -56,6 +76,7 @@ def main():
     print 'loading input reads from', inp
     ht.consume_fasta(inp)
 
+<<<<<<< HEAD
     # Change 0.2 only if you really grok it.  HINT: You don't.
     fp_rate = khmer.calc_expected_collisions(ht)
     print 'fp rate estimated to be %1.3f' % fp_rate
@@ -68,15 +89,21 @@ def main():
         print >>sys.stderr, "** Do not use these results!!"
         sys.exit(-1)
 
+=======
+>>>>>>> bleeding-edge
     print 'starting sweep.'
 
     n = 0
     m = 0
     for record in screed.open(readsfile):
+<<<<<<< HEAD
         if len(record.sequence) < K:
             continue
 
         if n % 100000 == 0:
+=======
+        if n % 10000 == 0:
+>>>>>>> bleeding-edge
             print '...', n, m
 
         count = ht.get_median_count(record.sequence)[0]
