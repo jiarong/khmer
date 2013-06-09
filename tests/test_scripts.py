@@ -164,6 +164,32 @@ def test_filter_abund_2():
     assert len(seqs) == 2, seqs
     assert 'GGTTGACGGGGCTCAGGG' in seqs
 
+# make sure that FASTQ records are retained.
+
+def test_filter_abund_3():
+    infile = utils.get_temp_filename('test.fq')
+    in_dir = os.path.dirname(infile)
+
+    shutil.copyfile(utils.get_test_data('test-abund-read-2.fq'), infile)
+    counting_ht = _make_counting(infile, K=17)
+
+    script = scriptpath('filter-abund.py')
+    args = ['-C', '1', counting_ht, infile, infile]
+    (status, out, err) = runscript(script, args, in_dir)
+    assert status == 0
+
+    outfile = infile + '.abundfilt'
+    assert os.path.exists(outfile), outfile
+
+    seqs = set([ r.sequence for r in screed.open(outfile) ])
+    assert len(seqs) == 2, seqs
+    assert 'GGTTGACGGGGCTCAGGG' in seqs
+
+    # check for 'accuracy' string.
+    seqs = set([ r.accuracy for r in screed.open(outfile) ])
+    assert len(seqs) == 2, seqs
+    assert '##################' in seqs
+
 def test_filter_stoptags():
     infile = utils.get_temp_filename('test.fa')
     in_dir = os.path.dirname(infile)
@@ -338,6 +364,29 @@ def test_load_graph():
     subset = ht.do_subset_partition(0, 0)
     x = ht.subset_count_partitions(subset)
     assert x == (1, 0), x
+
+def test_load_graph_no_tags():
+    script = scriptpath('load-graph.py')
+    args = ['-x', '1e7', '-N', '2', '-k', '20', '-n']
+
+    outfile = utils.get_temp_filename('out')
+    infile = utils.get_test_data('random-20-a.fa')
+
+    args.extend([outfile, infile])
+
+    (status, out, err) = runscript(script, args)
+    assert status == 0
+
+    ht_file = outfile + '.ht'
+    assert os.path.exists(ht_file), ht_file
+
+    tagset_file = outfile + '.tagset'
+    assert not os.path.exists(tagset_file), tagset_file
+
+    ht = khmer.load_hashbits(ht_file)
+
+    # can't think of a good way to make sure this worked, beyond just
+    # loading the ht file...
 
 def test_load_graph_fail():
     script = scriptpath('load-graph.py')
