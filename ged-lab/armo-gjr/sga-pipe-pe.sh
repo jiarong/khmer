@@ -112,11 +112,11 @@ $SGA_BIN index -a ropebwt -t $CPU -p $PREFIX $SEQ
 # Remove exact-match duplicates and reads with low-frequency k-mers
 
 #
-#ATT: turn off kmer abundance filter by -k 1 -x 1
+#ATT: turn off kmer abundance filter
 #
-echo "$SGA_BIN filter -k 1 -x 1 -t $CPU -p $PREFIX --homopolymer-check --low-complexity-check $SEQ" >> $PREFIX.runLog
+echo "$SGA_BIN filter --no-kmer-check -t $CPU -p $PREFIX --homopolymer-check --low-complexity-check $SEQ" >> $PREFIX.runLog
 (/usr/bin/time -f "eTime: %E; CPU: %P; maxMem: %M; AveMem: %K" \
-$SGA_BIN filter -k 1 -x 1 -t $CPU -p $PREFIX --homopolymer-check --low-complexity-check $SEQ
+$SGA_BIN filter --no-kmer-check -t $CPU -p $PREFIX --homopolymer-check --low-complexity-check $SEQ
 )
 
 # Compute the structure of the string graph

@@ -4,7 +4,7 @@ Use a set of query reads to sweep out overlapping reads from another file.
 
 % python scripts/sweep-reads2.py <query reads> <search reads>
 
-Results end up in <search reads>.tag.sweep2.
+Results end up in <search reads>.sweep2.
 
 Use '-h' for parameter help.
 """
@@ -14,6 +14,7 @@ import khmer
 import os.path
 import screed
 from khmer.hashbits_args import build_construct_args, DEFAULT_MIN_HASHSIZE
+
 
 def main():
     parser = build_construct_args()
@@ -45,9 +46,8 @@ def main():
 
     inp = args.input_filename
     readsfile = args.read_filename
-    tag = args.tag
 
-    outfile = os.path.basename(readsfile) + '.' + tag + '.sweep2'
+    outfile = os.path.basename(readsfile) + '.sweep2'
     outfp = open(outfile, 'w')
 
     # create a hashbits data structure
@@ -57,18 +57,6 @@ def main():
     print 'loading input reads from', inp
     ht.consume_fasta(inp)
 
-    # Change 0.2 only if you really grok it.  HINT: You don't.
-    fp_rate = khmer.calc_expected_collisions(ht)
-    print 'fp rate estimated to be %1.3f' % fp_rate
-
-    if fp_rate > 0.20:
-        print >>sys.stderr, "**"
-        print >>sys.stderr, "** ERROR: the counting hash is too small for"
-        print >>sys.stderr, "** this data set.  Increase hashsize/num ht."
-        print >>sys.stderr, "**"
-        print >>sys.stderr, "** Do not use these results!!"
-        sys.exit(-1)
-
     print 'starting sweep.'
 
     n = 0
@@ -77,7 +65,7 @@ def main():
         if len(record.sequence) < K:
             continue
 
-        if n % 100000 == 0:
+        if n % 10000 == 0:
             print '...', n, m
 
         count = ht.get_median_count(record.sequence)[0]
@@ -88,3 +76,5 @@ def main():
 
 if __name__ == '__main__':
     main()
+
+# vim: set ft=python ts=4 sts=4 sw=4 et tw=79:
