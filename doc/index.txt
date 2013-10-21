@@ -6,9 +6,17 @@
 khmer -- k-mer counting & filtering FTW
 =======================================
 
-:Authors: C. Titus Brown, Jason Pell, and Adina Howe.
-:Contact: ctb@msu.edu
+:Authors: Michael R. Crusoe, Greg Edvenson, Jordan Fish, Adina Howe, 
+          Eric McDonald, Joshua Nahum, Kaben Nanlohy, Jason Pell, Jared Simpson,
+          C. S. Welcher, Qingpeng Zhang, and C. Titus Brown
+
+:Contact: khmer-project@idyll.org
 :License: BSD
+
+khmer is a library and suite of command line tools for working with
+DNA sequence.  It is primarily aimed at short-read sequencing data
+such as that produced by the Illumina platform.  khmer takes a k-mer-centric
+approach to sequence analysis, hence the name.
 
 There are two mailing lists dedicated to khmer, an announcements-only list and
 a discussion list. To search their archives and sign-up for them, please visit
@@ -19,6 +27,14 @@ the following URLs:
     * Announcements: http://lists.idyll.org/listinfo/khmer-announce
 
 The archives for the khmer list are available at: http://lists.idyll.org/pipermail/khmer/
+
+khmer development has largely been supported by AFRI Competitive Grant
+no.  `2010-65205-20361
+<http://ged.msu.edu/downloads/2009-usda-vertex.pdf>`__ from the USDA
+NIFA, and is now funded by the National Human Genome Research
+Institute of the National Institutes of Health under Award Number
+`R01HG007513 <http://ged.msu.edu/downloads/2012-bigdata-nsf.pdf>`__,
+both to C. Titus Brown.
 
 Contents:
 
@@ -37,6 +53,8 @@ Contents:
    design
    details
    development
+   sequence-access-patterns
+   release
    crazy-ideas
    contributors
    biblio

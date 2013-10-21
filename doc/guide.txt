@@ -43,7 +43,7 @@ paper
 the `digital normalization paper <http://arxiv.org/abs/1203.4802>`__.
 
 There are many blog posts about this stuff on `Titus Brown's blog
-<http://ivory.idyll.org/blog/>`__.  We wil ltry to link them in where
+<http://ivory.idyll.org/blog/>`__.  We will try to link them in where
 appropriate.
 
 Asking for help
@@ -77,9 +77,7 @@ mangling.
 Picking hash table sizes and k parameters
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-For hash table sizes, read this:
-
-   http://khmer.readthedocs.org/en/latest/choosing-hash-sizes.html
+For hash table sizes, read :doc:`choosing-hash-sizes`
 
 For k-mer sizes, we recommend k=20 for digital normalization and k=32
 for partitioning; then assemble with a variety of k parameters.
@@ -99,7 +97,7 @@ strip-and-split-for-assembly, and normalize-by-median the pe and se
 files to C=5 (in that order).
 
 For low-coverage libraries (< 50x) do single-pass digital normalization:
-run normalize-by-median to C=5.
+run normalize-by-median to C=10.
 
 2. Extract any remaining paired-end reads and lump remaining orphan
 reads into singletons using strip-and-split-for-assembly

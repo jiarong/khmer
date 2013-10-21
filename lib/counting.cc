@@ -1,3 +1,9 @@
+//
+// This file is part of khmer, http://github.com/ged-lab/khmer/, and is
+// Copyright (C) Michigan State University, 2009-2013. It is licensed under
+// the three-clause BSD license; see doc/LICENSE.txt. Contact: ctb@msu.edu
+//
+
 #include "hashtable.hh"
 #include "counting.hh"
 #include "hashbits.hh"
@@ -10,51 +16,6 @@
 using namespace std;
 using namespace khmer;
 using namespace khmer:: read_parsers;
-
-MinMaxTable * CountingHash::fasta_file_to_minmax(
-    const std::string &inputfile,
-    unsigned long long total_reads,
-    CallbackFn callback,
-    void * callback_data
-)
-{
-    IParser* parser = IParser::get_parser(inputfile.c_str());
-    Read read;
-    string seq = "";
-    unsigned long long read_num = 0;
-
-    MinMaxTable * mmt = new MinMaxTable(total_reads);
-
-    while(!parser->is_complete()) {
-        read = parser->get_next_read();
-        seq = read.sequence;
-
-        bool valid_read = true;
-        valid_read = check_and_normalize_read(seq);
-        if (valid_read) {
-            BoundedCounterType minval = get_min_count(seq);
-            BoundedCounterType maxval = get_max_count(seq);
-
-            mmt->add_min(read_num, minval);
-            mmt->add_max(read_num, maxval);
-        }
-
-        seq.clear();
-        read_num += 1;
-
-        // run callback, if specified
-        if (read_num % CALLBACK_PERIOD == 0 && callback) {
-            try {
-                callback("fasta_file_to_minmax", callback_data, read_num, 0);
-            } catch (...) {
-                delete mmt;
-                throw;
-            }
-        }
-    }
-
-    return mmt;
-}
 
 ///
 /// output_fasta_kmer_pos_freq: outputs the kmer frequencies for each read
@@ -82,69 +43,52 @@ void CountingHash::output_fasta_kmer_pos_freq(const std::string &inputfile,
       outfile << endl;
    }
 
+   delete parser;
+
    outfile.close();
 }
 
-BoundedCounterType CountingHash::get_min_count(const std::string &s,
-					    HashIntoType lower_bound,
-					    HashIntoType upper_bound)
+BoundedCounterType CountingHash::get_min_count(const std::string &s)
 {
   KMerIterator kmers(s.c_str(), _ksize);
   HashIntoType kmer;
 
   BoundedCounterType min_count = MAX_COUNT, count;
 
-  bool bounded = true;
-  if (lower_bound == upper_bound && upper_bound == 0) {
-    bounded = false;
-  }
-
   while(!kmers.done()) {
     kmer = kmers.next();
 
-    if (!bounded || (kmer >= lower_bound && kmer < upper_bound)) {
-      count = this->get_count(kmer);
+    count = this->get_count(kmer);
     
-      if (count < min_count) {
-	min_count = count;
-      }
+    if (count < min_count) {
+      min_count = count;
     }
   }
   return min_count;
 }
 
-BoundedCounterType CountingHash::get_max_count(const std::string &s,
-					    HashIntoType lower_bound,
-					    HashIntoType upper_bound)
+BoundedCounterType CountingHash::get_max_count(const std::string &s)
 {
   KMerIterator kmers(s.c_str(), _ksize);
 
   BoundedCounterType max_count = 0, count;
 
-  bool bounded = true;
-  if (lower_bound == upper_bound && upper_bound == 0) {
-    bounded = false;
-  }
-
   HashIntoType kmer;
   while(!kmers.done()) {
     kmer = kmers.next();
 
-    if (!bounded || (kmer >= lower_bound && kmer < upper_bound)) {
-      count = this->get_count(kmer);
+    count = this->get_count(kmer);
 
-      if (count > max_count) {
-	max_count = count;
-      }
+    if (count > max_count) {
+      max_count = count;
     }
   }
   return max_count;
 }
 
-HashIntoType * CountingHash::abundance_distribution(std::string filename,
-						    Hashbits * tracking,
-			    CallbackFn callback,
-			    void * callback_data) const
+HashIntoType * 
+CountingHash::abundance_distribution(read_parsers::IParser * parser,
+				     Hashbits * tracking)
 {
   HashIntoType * dist = new HashIntoType[MAX_BIGCOUNT + 1];
   HashIntoType i;
@@ -154,7 +98,7 @@ HashIntoType * CountingHash::abundance_distribution(std::string filename,
   }
 
   Read read;
-  IParser* parser = IParser::get_parser(filename.c_str());
+  
   string name;
   string seq;
   unsigned long long read_num = 0;
@@ -186,18 +130,17 @@ HashIntoType * CountingHash::abundance_distribution(std::string filename,
     }
 
     read_num += 1;
-
-    // run callback, if specified
-    if (read_num % CALLBACK_PERIOD == 0 && callback) {
-      try {
-        callback("abundance_distribution", callback_data, read_num, 0);
-      } catch (...) {
-        throw;
-      }
-    }
   }
-
   return dist;
+}
+
+
+HashIntoType * CountingHash::abundance_distribution(std::string filename,
+						    Hashbits * tracking)
+{
+  IParser* parser = IParser::get_parser(filename.c_str());
+
+  return abundance_distribution(parser, tracking);
 }
 
 HashIntoType * CountingHash::fasta_count_kmers_by_position(const std::string &inputfile,
@@ -254,6 +197,8 @@ HashIntoType * CountingHash::fasta_count_kmers_by_position(const std::string &in
           }
    } // while reads
 
+   delete parser;
+
    return counts;
 }
 
@@ -303,6 +248,8 @@ void CountingHash::fasta_dump_kmers_by_abundance(const std::string &inputfile,
             }
         }
     } // while reads
+
+    delete parser;
 }
 
 void CountingHash::save(std::string outfilename)
@@ -397,6 +344,10 @@ void CountingHash::get_kmer_abund_mean(const std::string &filename,
 #endif // 0
   }
 
+  delete parser;
+
+  if (count == 0) { throw InvalidReadFileFormat(NULL, "no counts"); } 
+
   mean = float(total) / float(count);
 }
 
@@ -445,6 +396,10 @@ void CountingHash::get_kmer_abund_abs_deviation(const std::string &filename,
     }
 #endif // 0
   }
+
+  delete parser;
+
+  if (count == 0) { throw InvalidReadFileFormat(NULL, "no counts"); }
 
   abs_deviation = total / float(count);
 }

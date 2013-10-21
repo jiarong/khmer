@@ -1,3 +1,9 @@
+//
+// This file is part of khmer, http://github.com/ged-lab/khmer/, and is
+// Copyright (C) Michigan State University, 2009-2013. It is licensed under
+// the three-clause BSD license; see doc/LICENSE.txt. Contact: ctb@msu.edu
+//
+
 #ifndef COUNTING_HH
 #define COUNTING_HH
 
@@ -171,30 +177,21 @@ namespace khmer {
       return min_count;
     }
 
-    MinMaxTable * fasta_file_to_minmax(const std::string &inputfile,
-				      unsigned long long total_reads,
-				      CallbackFn callback = NULL,
-				      void * callback_data = NULL);
-
     void output_fasta_kmer_pos_freq(const std::string &inputfile,
                                     const std::string &outputfile);
 
-    BoundedCounterType get_min_count(const std::string &s,
-				     HashIntoType lower_bound = 0,
-				     HashIntoType upper_bound = 0);
+    BoundedCounterType get_min_count(const std::string &s);
 				     
-    BoundedCounterType get_max_count(const std::string &s,
-				     HashIntoType lower_bound = 0,
-				     HashIntoType upper_bound = 0);
+    BoundedCounterType get_max_count(const std::string &s);
 
     void get_kadian_count(const std::string &s,
 			  BoundedCounterType &kadian,
 			  unsigned int nk = 1);
 
+    HashIntoType * abundance_distribution(read_parsers::IParser * parser,
+					  Hashbits * tracking);
     HashIntoType * abundance_distribution(std::string filename,
-					  Hashbits * tracking,
-					  CallbackFn callback = NULL,
-					  void * callback_data = NULL) const;
+					  Hashbits * tracking);
 
     HashIntoType * fasta_count_kmers_by_position(const std::string &inputfile,
 					 const unsigned int max_read_len,

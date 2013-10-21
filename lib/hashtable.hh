@@ -1,3 +1,9 @@
+//
+// This file is part of khmer, http://github.com/ged-lab/khmer/, and is
+// Copyright (C) Michigan State University, 2009-2013. It is licensed under
+// the three-clause BSD license; see doc/LICENSE.txt. Contact: ctb@msu.edu
+//
+
 #ifndef HASHTABLE_HH
 #define HASHTABLE_HH
 
@@ -82,6 +88,9 @@ namespace khmer {
 
       index = _ksize - 1;
       length = strlen(seq);
+      _kmer_f = 0;
+      _kmer_r = 0;
+
       initialized = false;
     }
 
@@ -310,18 +319,18 @@ namespace khmer {
     virtual void load(std::string) = 0;
 
     // count every k-mer in the string.
-    unsigned int consume_string(const std::string &s,
-				HashIntoType lower_bound = 0,
-				HashIntoType upper_bound = 0);
+    unsigned int consume_string(const std::string &s);
+    
+    // count every k-mer in the string.
+    unsigned int consume_high_abund_kmers(const std::string &s,
+					  BoundedCounterType min_count);
     
     // checks each read for non-ACGT characters
     bool check_and_normalize_read(std::string &read) const;
 
     // check each read for non-ACGT characters, and then consume it.
     unsigned int check_and_process_read(std::string &read,
-					bool &is_valid,
-					HashIntoType lower_bound = 0,
-					HashIntoType upper_bound = 0);
+					bool &is_valid);
     
     // Count every k-mer in a FASTA or FASTQ file.
     // Note: Yes, the name 'comsume_fasta' is a bit misleading, 
@@ -331,8 +340,6 @@ namespace khmer {
 	std::string const   &filename,
 	unsigned int	    &total_reads,
 	unsigned long long  &n_consumed,
-	HashIntoType	    lower_bound	    = 0,
-	HashIntoType	    upper_bound	    = 0,
 	CallbackFn	    callback	    = NULL,
 	void *		    callback_data   = NULL
     );
@@ -342,8 +349,6 @@ namespace khmer {
 	read_parsers:: IParser *	    parser,
 	unsigned int	    &total_reads,
 	unsigned long long  &n_consumed,
-	HashIntoType	    lower_bound	    = 0,
-	HashIntoType	    upper_bound	    = 0,
 	CallbackFn	    callback	    = NULL,
 	void *		    callback_data   = NULL
     );

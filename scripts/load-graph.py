@@ -1,4 +1,9 @@
 #! /usr/bin/env python
+#
+# This file is part of khmer, http://github.com/ged-lab/khmer/, and is
+# Copyright (C) Michigan State University, 2009-2013. It is licensed under
+# the three-clause BSD license; see doc/LICENSE.txt. Contact: ctb@msu.edu
+#
 """
 Build a graph from the given sequences, save in <htname>.
 
@@ -57,6 +62,10 @@ def main():
         target_method = ht.consume_fasta_with_reads_parser
     else:
         target_method = ht.consume_fasta_and_tag_with_reads_parser
+
+    config = khmer.get_config()
+    bufsz = config.get_reads_input_buffer_size()
+    config.set_reads_input_buffer_size(n_threads * 64 * 1024)
 
     for n, filename in enumerate(filenames):
         
