@@ -4,7 +4,7 @@ Use a set of query reads to sweep out overlapping reads from another file.
 
 % python scripts/sweep-reads2.py <query reads> <search reads> tag
 
-Results end up in <search reads>.tag.sweep2.
+Results end up in <search reads>.tag.sweep2, <search reads>.tag.nonswept.
 
 Use '-h' for parameter help.
 """
@@ -12,7 +12,6 @@ Use '-h' for parameter help.
 import sys
 import khmer
 import os.path
-import time
 import screed
 from khmer.hashbits_args import build_construct_args, DEFAULT_MIN_HASHSIZE
 
@@ -50,7 +49,9 @@ def main():
     tag = args.tag
 
     outfile = os.path.basename(readsfile) + '.' + tag + '.sweep2'
-    outfp = open(outfile, 'w')
+    nonswept = os.path.basename(readsfile) + '.' + tag + '.nonswept'
+    outfp = open(outfile, 'wb')
+    outfp2 = open(nonswept, 'wb')
 
     # create a hashbits data structure
     ht = khmer.new_hashbits(K, HT_SIZE, N_HT)
@@ -61,7 +62,7 @@ def main():
 
     # Change 0.2 only if you really grok it.  HINT: You don't.
     fp_rate = khmer.calc_expected_collisions(ht)
-    print 'fp rate estimated to be %1.3f' % fp_rate
+    print >> sys.stderr, 'fp rate estimated to be %1.3f' % fp_rate
 
     if fp_rate > 0.20:
         print >>sys.stderr, "**"
@@ -75,12 +76,8 @@ def main():
 
     n = 0
     m = 0
-    totalBp = 0
-    start = time.time()
     for record in screed.open(readsfile):
-        seqLen = len(record.sequence)
-        totalBp += seqLen
-        if seqLen < K:
+        if len(record.sequence) < K:
             continue
 
         if n % 1000000 == 0:
@@ -90,13 +87,11 @@ def main():
         if count:
             m += 1
             outfp.write('>%s\n%s\n' % (record.name, record.sequence))
+        else:
+            outfp2.write('>%s\n%s\n' % (record.name, record.sequence))
         n += 1
 
-    end = time.time()
-    duration = end - start
-    print >> sys.stderr, 'Stats of the run:'
-    print >> sys.stderr, '%.1f seqs per second' %(n*1.0/duration)
-    print >> sys.stderr, '%.1f Mbps per second' %(totalBp*(1e-6)/duration)
+    print >> sys.stderr, '%d of %d are swept' %(m, n)
 
 if __name__ == '__main__':
     main()

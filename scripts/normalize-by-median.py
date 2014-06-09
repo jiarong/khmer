@@ -81,7 +81,10 @@ def normalize_by_median(input_filename, outfp, ht, args, report_fp=None):
                 continue
 
             seq = record.sequence.replace('N', 'A')
-            med, _, _ = ht.get_median_count(seq)
+            try:
+                med, _, _ = ht.get_median_count(seq)
+            except:
+                continue
 
             if med < DESIRED_COVERAGE:
                 ht.consume(seq)
